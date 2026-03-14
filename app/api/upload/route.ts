@@ -27,10 +27,20 @@ export async function POST(request: NextRequest) {
     const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
 
     const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
-      cloudinary.uploader.upload(base64, { folder: "edeal-participants" }, (err, res) => {
-        if (err) reject(err);
-        else resolve(res as { secure_url: string });
-      });
+      cloudinary.uploader.upload(
+        base64,
+        {
+          folder: "edeal-participants",
+          resource_type: "image",
+          // Preserve large image size; avoid aggressive resize
+          quality: "auto:best",
+          fetch_format: "auto",
+        },
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res as { secure_url: string });
+        }
+      );
     });
 
     return NextResponse.json({ url: result.secure_url });
