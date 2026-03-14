@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState, useRef } from "react";
 
 const LOGO_PATH = "/logo/edealindia.webp";
@@ -98,7 +97,7 @@ export default function FormPage() {
   return (
     <div className="min-h-screen premium-bg text-white">
       <div className="mx-auto flex min-h-screen max-w-lg flex-col px-5 py-8 sm:px-8">
-        <header className="mb-8 flex items-center justify-between">
+        <header className="mb-8 flex justify-center">
           <a
             href="https://edealindia.com"
             target="_blank"
@@ -121,21 +120,23 @@ export default function FormPage() {
               </span>
             )}
           </a>
-          <Link
-            href="/spin"
-            className="rounded-lg border border-[rgba(212,175,55,0.4)] bg-white/5 px-4 py-2 text-sm font-medium text-[#d4af37] transition hover:bg-white/10"
-          >
-            Lucky draw
-          </Link>
         </header>
 
         <div className="flex flex-1 flex-col justify-center">
           <div className="premium-glass w-full rounded-2xl border border-[rgba(212,175,55,0.25)] p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_24px_48px_rgba(0,0,0,0.4)] sm:p-8">
+            <div className="mb-4 flex justify-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(201,162,39,0.4)] bg-[rgba(201,162,39,0.08)] px-3 py-1 text-xs font-medium tracking-wide text-[#c9a227]">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" />
+                </svg>
+                AI-powered fair selection
+              </span>
+            </div>
             <h1 className="text-center text-xl font-bold tracking-tight text-white sm:text-2xl">
               Register for the draw
             </h1>
-            <p className="mt-2 text-center text-sm text-white/70">
-              One entry per phone number. Name, phone, and photo are required.
+            <p className="mt-2 text-center text-sm leading-relaxed text-white/70">
+              Our AI will fairly pick the lucky winner from all entries. Just add your details below — it’s quick and easy.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-6">

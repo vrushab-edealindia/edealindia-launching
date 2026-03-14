@@ -354,8 +354,14 @@ export default function SpinPage() {
             <p className="text-white/60">Loading participants…</p>
           ) : people.length === 0 ? (
             <div className="premium-glass w-full max-w-md rounded-2xl border border-[rgba(212,175,55,0.25)] p-8 text-center">
-              <p className="text-white/80">No participants in the database yet.</p>
-              <p className="mt-2 text-sm text-white/55">Entries from the registration form will appear here.</p>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(201,162,39,0.3)] bg-[rgba(201,162,39,0.06)] px-3 py-1 text-xs font-medium text-[#c9a227]/90">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" />
+                </svg>
+                AI-powered draw
+              </span>
+              <p className="mt-4 text-white/80">No participants in the database yet.</p>
+              <p className="mt-2 text-sm text-white/55">Entries from the registration form will appear here. Our AI will then fairly select the winners.</p>
               <Link
                 href="/form"
                 className="premium-gold mt-6 inline-block rounded-xl px-6 py-3 font-bold tracking-wide text-[#0f0d1a]"
@@ -365,6 +371,14 @@ export default function SpinPage() {
             </div>
           ) : showBigWinner ? (
             <div className="premium-glass w-full max-w-sm rounded-2xl border border-[rgba(212,175,55,0.35)] p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_24px_48px_rgba(0,0,0,0.4)]">
+              <div className="mb-2 flex justify-center">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(201,162,39,0.4)] bg-[rgba(201,162,39,0.08)] px-3 py-1 text-xs font-medium text-[#c9a227]">
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" />
+                  </svg>
+                  AI selected
+                </span>
+              </div>
               <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#c9a227]">
                 Lucky Winner
               </p>
@@ -383,6 +397,14 @@ export default function SpinPage() {
             </div>
           ) : (
             <>
+              <div className="mb-3 flex justify-center">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(201,162,39,0.4)] bg-[rgba(201,162,39,0.08)] px-4 py-1.5 text-xs font-medium tracking-wide text-[#c9a227]">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" />
+                  </svg>
+                  {isSpinning ? "AI selecting winner…" : "AI-powered fair selection"}
+                </span>
+              </div>
               <div className="mb-1.5 flex justify-center">
                 <div
                   className="h-0 w-0 border-l-10 border-r-10 border-t-14 border-l-transparent border-r-transparent border-t-[#c9a227] drop-shadow-[0_0_12px_rgba(201,162,39,0.5)]"
@@ -411,7 +433,11 @@ export default function SpinPage() {
               >
                 <div
                   className="relative overflow-hidden rounded-[17px] bg-[#0c0a14] shadow-[inset_0_0_60px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)]"
-                  style={{ height: REEL_HEIGHT }}
+                  style={{
+                    height: REEL_HEIGHT,
+                    backgroundImage: "radial-gradient(ellipse 80% 50% at 50% 50%, rgba(201,162,39,0.06) 0%, transparent 55%), linear-gradient(rgba(201,162,39,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(201,162,39,0.02) 1px, transparent 1px)",
+                    backgroundSize: "100% 100%, 24px 24px, 24px 24px",
+                  }}
                 >
                   <div
                     className="flex flex-col"
@@ -477,17 +503,23 @@ export default function SpinPage() {
                 disabled={isSpinning || allDone || availablePeople.length === 0}
                 className="premium-gold mt-6 w-full max-w-md rounded-xl py-4 text-base font-bold tracking-wide text-[#0f0d1a] shadow-[0_4px_20px_rgba(212,175,55,0.25)] transition hover:opacity-95 hover:shadow-[0_6px_28px_rgba(212,175,55,0.3)] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
               >
-                {allDone ? "Complete" : isSpinning ? "Spinning…" : "START DRAW"}
+                {allDone ? "Complete" : isSpinning ? "AI selecting…" : "START DRAW"}
               </button>
-              <p className="mt-3 text-center text-xs font-medium tracking-widest text-white/50 uppercase">
-                Select Lucky Winners
+              <p className="mt-3 flex items-center justify-center gap-2 text-xs font-medium tracking-widest text-white/50 uppercase">
+                <svg className="h-3.5 w-3.5 text-[#c9a227]/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" />
+                </svg>
+                Powered by AI · Fair selection
               </p>
             </>
           )}
         </div>
 
         <div className="shrink-0">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+          <h2 className="mb-4 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/50 sm:justify-start">
+            <svg className="h-3.5 w-3.5 text-[#c9a227]/60" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" />
+            </svg>
             Previous Winners
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 sm:gap-4">
