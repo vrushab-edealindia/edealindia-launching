@@ -188,6 +188,7 @@ export default function FormPage() {
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
+                    capture="environment"
                     onChange={onFileChange}
                     className="hidden"
                     id="photo"
@@ -196,7 +197,7 @@ export default function FormPage() {
                     htmlFor="photo"
                     className="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10"
                   >
-                    Choose image
+                    Take photo
                   </label>
                   {preview && (
                     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-[rgba(212,175,55,0.35)]">
