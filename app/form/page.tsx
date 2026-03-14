@@ -46,27 +46,21 @@ export default function FormPage() {
       setMessage({ type: "error", text: "Please enter your phone number." });
       return;
     }
+    if (!imageFile) {
+      setMessage({ type: "error", text: "Please add your photo." });
+      return;
+    }
     setLoading(true);
     try {
-      let imageUrl = "";
-      let skippedPhoto = false;
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-        if (!uploadRes.ok) {
-          if (uploadRes.status === 503) {
-            imageUrl = "";
-            skippedPhoto = true;
-          } else {
-            const err = await uploadRes.json().catch(() => ({}));
-            throw new Error((err as { error?: string }).error || "Image upload failed");
-          }
-        } else {
-          const data = (await uploadRes.json()) as { url?: string };
-          imageUrl = data?.url ?? "";
-        }
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json().catch(() => ({}));
+        throw new Error((err as { error?: string }).error || "Image upload failed");
       }
+      const data = (await uploadRes.json()) as { url?: string };
+      const imageUrl = data?.url ?? "";
       const res = await fetch("/api/participants", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -83,9 +77,7 @@ export default function FormPage() {
       }
       setMessage({
         type: "success",
-        text: skippedPhoto
-          ? "Registered successfully without photo (image upload not configured). Only one entry per number."
-          : "You’re registered successfully. Only one entry per number is allowed.",
+        text: "You’re registered successfully. Only one entry per number is allowed.",
       });
       setName("");
       setPhoneNumber("");
@@ -143,7 +135,7 @@ export default function FormPage() {
               Register for the draw
             </h1>
             <p className="mt-2 text-center text-sm text-white/70">
-              One entry per phone number. Add your details below.
+              One entry per phone number. Name, phone, and photo are required.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -181,7 +173,7 @@ export default function FormPage() {
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-white/60">
-                  Photo (optional)
+                  Photo <span className="text-[#c9a227]">*</span>
                 </label>
                 <div className="mt-2 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                   <input
@@ -192,6 +184,7 @@ export default function FormPage() {
                     onChange={onFileChange}
                     className="hidden"
                     id="photo"
+                    required
                   />
                   <label
                     htmlFor="photo"

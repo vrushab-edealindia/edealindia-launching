@@ -150,37 +150,30 @@ export default function SpinPage() {
     setCurrentSlot(0);
   };
 
-  const SPIN_LIST = Array.from({ length: NUM_COPIES }, () => [...people]).flat();
+  const wonIds = winners.filter((w): w is Person => w != null).map((w) => w.id);
+  const availablePeople = people.filter((p) => !wonIds.includes(p.id));
+  const SPIN_LIST = availablePeople.length > 0 ? Array.from({ length: NUM_COPIES }, () => [...availablePeople]).flat() : [];
+
   const allDone = currentSlot >= LUCKY_WINNERS_COUNT;
   const filledCount = winners.filter(Boolean).length;
   const lastWinner = filledCount > 0 ? winners[filledCount - 1] : null;
   const showBigWinner = !isSpinning && lastWinner != null;
 
   const spin = useCallback(() => {
-    if (isSpinning || allDone || people.length === 0) return;
-    const wonIds = winners.filter((w): w is Person => w != null).map((w) => w.id);
-    const available = people.filter((p) => !wonIds.includes(p.id));
-    if (available.length === 0) return;
-
-    const chosen = available[Math.floor(Math.random() * available.length)];
-    const randomIndex = people.findIndex((p) => p.id === chosen.id);
-    if (randomIndex < 0) return;
-
-    const spinList = Array.from({ length: NUM_COPIES }, () => [...people]).flat();
-    const winnerItemIndex = (NUM_COPIES - 1) * people.length + randomIndex;
-    const winnerY = -winnerItemIndex * CARD_HEIGHT;
-    const winnerStartIndex = (NUM_COPIES - 1) * people.length;
+    if (isSpinning || allDone || availablePeople.length === 0) return;
+    const available = availablePeople;
+    const randomIndexInAvailable = Math.floor(Math.random() * available.length);
+    const chosen = available[randomIndexInAvailable];
+    const spinList = Array.from({ length: NUM_COPIES }, () => [...available]).flat();
+    const winnerItemIndex = (NUM_COPIES - 1) * available.length + randomIndexInAvailable;
+    const winnerStartIndex = (NUM_COPIES - 1) * available.length;
     const phase1EndIndex = randInt(Math.floor(winnerStartIndex * 0.35), Math.floor(winnerStartIndex * 0.5));
     const y1 = -phase1EndIndex * CARD_HEIGHT;
     const itemsBeforeWinner = randInt(2, 4);
     const y2 = -(winnerItemIndex - itemsBeforeWinner) * CARD_HEIGHT;
     const y3 = -(winnerItemIndex - 1) * CARD_HEIGHT;
-    const doNudge = Math.random() < 0.5;
-    const nudgeItems = doNudge ? randInt(1, 3) : 0;
-    const finalItemIndex = Math.min(spinList.length - 1, winnerItemIndex + nudgeItems);
-    const finalY = -finalItemIndex * CARD_HEIGHT;
-    const finalWinnerIndex = finalItemIndex % people.length;
-    const actualWinner = people[finalWinnerIndex];
+    const centerY = -(winnerItemIndex - 1) * CARD_HEIGHT;
+    const actualWinner = chosen;
 
     setIsSpinning(true);
     setSpinPhase("fast");
@@ -190,7 +183,6 @@ export default function SpinPage() {
     const T_SLOW_END = T_FAST_END + SLOW_SPIN_MS;
     const T_CREEP_END = T_SLOW_END + CREEP_MS;
     const T_CREEP2_END = T_CREEP_END + CREEP2_MS;
-    const T_NUDGE_END = doNudge ? T_CREEP2_END + NUDGE_MS : T_CREEP2_END;
 
     const startTime = performance.now();
     const easeOut4 = (t: number) => 1 - Math.pow(1 - t, 4);
@@ -203,7 +195,6 @@ export default function SpinPage() {
       else if (elapsed < T_SLOW_END) setSpinPhase("slowing");
       else if (elapsed < T_CREEP_END) setSpinPhase("creep");
       else if (elapsed < T_CREEP2_END) setSpinPhase("creep2");
-      else if (elapsed < T_NUDGE_END) setSpinPhase("nudge");
       else setSpinPhase("stopped");
 
       if (elapsed < T_FAST_END) {
@@ -216,20 +207,9 @@ export default function SpinPage() {
         setTranslateY(y2 + (y3 - y2) * easeOut5(t));
       } else if (elapsed < T_CREEP2_END) {
         const t = (elapsed - T_CREEP_END) / CREEP2_MS;
-        setTranslateY(y3 + (winnerY - y3) * easeOut5(t));
-      } else if (elapsed < T_NUDGE_END && doNudge) {
-        const t = (elapsed - T_CREEP2_END) / NUDGE_MS;
-        setTranslateY(winnerY + (finalY - winnerY) * easeOut5(t));
-      } else if (elapsed >= T_NUDGE_END) {
-        setTranslateY(finalY);
-        setWinners((prev) => { const next = [...prev]; next[currentSlot] = actualWinner; return next; });
-        setCurrentSlot((s) => s + 1);
-        setIsSpinning(false);
-        setSpinPhase("idle");
-        spinRef.current = null;
-        return;
+        setTranslateY(y3 + (centerY - y3) * easeOut5(t));
       } else {
-        setTranslateY(winnerY);
+        setTranslateY(centerY);
         setWinners((prev) => { const next = [...prev]; next[currentSlot] = actualWinner; return next; });
         setCurrentSlot((s) => s + 1);
         setIsSpinning(false);
@@ -240,7 +220,7 @@ export default function SpinPage() {
       spinRef.current = requestAnimationFrame(animate);
     };
     spinRef.current = requestAnimationFrame(animate);
-  }, [isSpinning, allDone, currentSlot, winners, people]);
+  }, [isSpinning, allDone, currentSlot, winners, availablePeople]);
 
   if (!authChecked) {
     return (
@@ -409,6 +389,20 @@ export default function SpinPage() {
                   aria-hidden
                 />
               </div>
+              <div className="mb-4 flex justify-center">
+                {!logoError ? (
+                  <Image
+                    src={LOGO_PATH}
+                    alt="EdealIndia"
+                    width={120}
+                    height={42}
+                    className="h-9 w-auto object-contain opacity-90"
+                    onError={() => setLogoError(true)}
+                  />
+                ) : (
+                  <span className="text-lg font-bold tracking-tight text-white/90">EdealIndia</span>
+                )}
+              </div>
               <div
                 className="relative w-full max-w-md rounded-[20px] p-[3px] shadow-[0_0_0_1px_rgba(212,175,55,0.2),0_0_40px_rgba(212,175,55,0.08),0_24px_60px_rgba(0,0,0,0.5)]"
                 style={{
@@ -429,12 +423,25 @@ export default function SpinPage() {
                     {SPIN_LIST.map((person, i) => (
                       <div
                         key={`${person.id}-${i}`}
-                        className="flex shrink-0 items-center px-6"
+                        className="flex shrink-0 items-center gap-4 px-6 pr-14"
                         style={{ height: CARD_HEIGHT, minHeight: CARD_HEIGHT }}
                       >
-                        <p className="truncate text-sm font-medium tracking-wide text-white/95">
-                          {person.name} – {person.phoneNumber}
-                        </p>
+                        <Image
+                          src={person.photo}
+                          alt=""
+                          width={48}
+                          height={48}
+                          className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white/20"
+                          unoptimized
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold tracking-wide text-white/95">
+                            {person.name}
+                          </p>
+                          <p className="truncate text-xs text-white/65">
+                            {person.phoneNumber}
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -446,9 +453,17 @@ export default function SpinPage() {
                         ? "border-[#c9a227]/60 bg-[rgba(201,162,39,0.12)] shadow-[0_0_20px_rgba(201,162,39,0.15)]"
                         : "border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.06)]"
                     }`}
-                    style={{ top: 4, height: CARD_HEIGHT - 8 }}
+                    style={{ top: CARD_HEIGHT + 4, height: CARD_HEIGHT - 8 }}
                     aria-hidden
                   />
+                  <div
+                    className="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center text-[#c9a227]"
+                    aria-hidden
+                  >
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" className="drop-shadow-[0_0_10px_rgba(201,162,39,0.6)]" aria-hidden>
+                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </>
@@ -459,7 +474,7 @@ export default function SpinPage() {
               <button
                 type="button"
                 onClick={spin}
-                disabled={isSpinning || allDone}
+                disabled={isSpinning || allDone || availablePeople.length === 0}
                 className="premium-gold mt-6 w-full max-w-md rounded-xl py-4 text-base font-bold tracking-wide text-[#0f0d1a] shadow-[0_4px_20px_rgba(212,175,55,0.25)] transition hover:opacity-95 hover:shadow-[0_6px_28px_rgba(212,175,55,0.3)] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
               >
                 {allDone ? "Complete" : isSpinning ? "Spinning…" : "START DRAW"}
