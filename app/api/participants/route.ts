@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Participant } from "@/lib/models/Participant";
 import { getSession } from "@/lib/auth";
+import { emitRegistration } from "@/lib/registrationChannel";
 
 export async function GET() {
   const session = await getSession();
@@ -60,13 +61,17 @@ export async function POST(request: NextRequest) {
       location: location?.trim() ?? "",
     });
 
-    return NextResponse.json({
+    const payload = {
       id: doc._id.toString(),
       name: doc.name,
       phoneNumber: doc.phoneNumber,
       imageUrl: doc.imageUrl ?? "",
       location: doc.location ?? "",
-    });
+      createdAt: doc.createdAt?.toISOString?.(),
+    };
+    emitRegistration(payload);
+
+    return NextResponse.json(payload);
   } catch (e) {
     if (e instanceof Error && (e as { code?: number }).code === 11000) {
       return NextResponse.json(

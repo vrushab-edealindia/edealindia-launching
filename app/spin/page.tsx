@@ -346,6 +346,12 @@ export default function SpinPage() {
             >
               Logout
             </button>
+            <Link
+              href="/live"
+              className="rounded-lg border border-[rgba(212,175,55,0.4)] bg-white/5 px-4 py-2 text-sm font-medium text-[#d4af37] transition hover:bg-white/10"
+            >
+              Live registrations
+            </Link>
           </div>
         </header>
 
